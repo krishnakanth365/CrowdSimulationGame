@@ -27,6 +27,7 @@ public class FlockGenerator : MonoBehaviour
 
     private void GenerateMaxFlocks()
     {
+        int randomNumber = Random.Range(0, flockSize);
         for (int i = 0; i < flockSize; i++)
         {
             int randomNum = Random.Range(0, npcs.Length);
@@ -39,9 +40,14 @@ public class FlockGenerator : MonoBehaviour
             targetPositon = GetRandomPointOnMesh(mesh);
             newFlock.transform.position = targetPositon;
             newFlock.transform.parent = flockHolder.transform;
-            Flock newFlockComp = newFlock.AddComponent<Flock>();
+            Flock newFlockComp = newFlock.GetComponent<Flock>();
             newFlockComp.flockParameters = flockParameters;
             flockList.Add(newFlockComp);
+            if (i == randomNumber)
+            {
+                newFlockComp.SetAsTheif();
+                newFlock.gameObject.name = "THEIFF NPC";
+            }
         }
     }
 
