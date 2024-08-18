@@ -52,6 +52,5 @@ public class UI_Hints : MonoBehaviour
         }
         textHintObjsHolder[count].gameObject.SetActive(true);
         count++;
-        Debug.Log(count);
     }
 }

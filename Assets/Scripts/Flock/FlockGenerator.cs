@@ -10,6 +10,15 @@ using Random = UnityEngine.Random;
 [Serializable] public class FlockParameters
 {
     public float speed;
+
+    public float neighborRadius = 3f;
+    public float separationDistance = 1.5f;
+
+    public float separationWeight = 1.5f;
+    public float alignmentWeight = 1.0f;
+    public float cohesionWeight = 1.0f;
+    public float randomnessFactor = 0.1f; // New property to control randomness
+
 }
 
 public class FlockGenerator : MonoBehaviour

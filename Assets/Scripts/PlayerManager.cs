@@ -37,7 +37,6 @@ public class PlayerManager : MonoBehaviour
         
     }
 
-    // Update is called once per frame
     void Update()
     {
         float x = Input.GetAxis("Horizontal");
@@ -57,6 +56,18 @@ public class PlayerManager : MonoBehaviour
         if (Physics.Raycast(transform.position, Camera.main.transform.forward, out RaycastHit hitInfo, 2f, npcLayer))
         {
             uiButtons.SetActive(true);
+            if (!hitInfo.collider.gameObject.GetComponent<Flock>().isTheif)
+            {
+                hitInfo.collider.gameObject.GetComponent<Flock>().PauseFlock(0.5f);
+            }
+            else
+            {
+                hitInfo.collider.gameObject.GetComponent<Flock>().PauseFlock(0.2f);
+                float maxSpeed = hitInfo.collider.gameObject.GetComponent<Flock>().flockParameters.speed;
+                maxSpeed += 0.2f;
+                maxSpeed = Mathf.Clamp(maxSpeed, 1f, 5f);
+                hitInfo.collider.gameObject.GetComponent<Flock>().flockParameters.speed = maxSpeed;
+            }
             if (Input.GetKeyDown(KeyCode.E))
             {
                 Investigate(hitInfo.collider.gameObject);
