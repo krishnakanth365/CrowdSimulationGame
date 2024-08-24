@@ -167,13 +167,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   flockParameters:
     speed: 0
+    neighborRadius: 3
+    separationDistance: 1.5
+    separationWeight: 1.5
+    alignmentWeight: 1
+    cohesionWeight: 1
+    randomnessFactor: 0.1
   isTheif: 0
+  face: {fileID: 21300000, guid: 563b6b4e4d895974dacf036c1770a5a1, type: 3}
+  myName: Jack
   hatObj: {fileID: 3341094029151073711}
   watchObj: {fileID: 3146386376569152047}
   bagObj: {fileID: 2056982081935759229}
   hasBag: 0
   hasWatch: 0
   hasHat: 0
+  updateInterval: 7
+  myAnimator: {fileID: 0}
 --- !u!136 &-3387343259685851496
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -317,17 +327,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: ab33154a019c1b44d81b75c975a4b5de,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0.0122
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ab33154a019c1b44d81b75c975a4b5de,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.0001
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ab33154a019c1b44d81b75c975a4b5de,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ab33154a019c1b44d81b75c975a4b5de,
         type: 3}
@@ -383,6 +393,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Layer
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ab33154a019c1b44d81b75c975a4b5de,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6147876264314993998, guid: ab33154a019c1b44d81b75c975a4b5de,
         type: 3}

@@ -19,12 +19,18 @@ public class PlayerManager : MonoBehaviour
 
     private Vector3 velocity;
 
-    public static int strikes = 0;
+    public int strikes = 0;
     [SerializeField] TMP_Text strikesText;
 
     public static PlayerManager instance;
 
     public Action OnStrike;
+
+    [SerializeField] Sprite myPortrait;
+    [SerializeField] Sprite[] npcPortraits;
+
+    [SerializeField] string[] conversations;
+    private Flock prevFlock;
 
     private void Awake()
     {
@@ -56,25 +62,44 @@ public class PlayerManager : MonoBehaviour
         if (Physics.Raycast(transform.position, Camera.main.transform.forward, out RaycastHit hitInfo, 2f, npcLayer))
         {
             uiButtons.SetActive(true);
-            if (!hitInfo.collider.gameObject.GetComponent<Flock>().isTheif)
+            if (!ConversationManager.instance.dialogueIsPlaying)
             {
-                hitInfo.collider.gameObject.GetComponent<Flock>().PauseFlock(0.5f);
-            }
-            else
-            {
-                hitInfo.collider.gameObject.GetComponent<Flock>().PauseFlock(0.2f);
-                float maxSpeed = hitInfo.collider.gameObject.GetComponent<Flock>().flockParameters.speed;
-                maxSpeed += 0.2f;
-                maxSpeed = Mathf.Clamp(maxSpeed, 1f, 5f);
-                hitInfo.collider.gameObject.GetComponent<Flock>().flockParameters.speed = maxSpeed;
+                if (!hitInfo.collider.gameObject.GetComponent<Flock>().isTheif)
+                {
+                    if (!hitInfo.collider.gameObject.GetComponent<Flock>().isTheif)
+                    {
+                        if (prevFlock != null)
+                        {
+                            prevFlock.ResumeFlock();
+                        }
+                        prevFlock = hitInfo.collider.gameObject.GetComponent<Flock>();
+                        prevFlock.PauseFlock();
+                    }
+                }
+                else
+                {
+                    hitInfo.collider.gameObject.GetComponent<Flock>().PauseFlock(1f);
+                    float maxSpeed = hitInfo.collider.gameObject.GetComponent<Flock>().flockParameters.speed;
+                    maxSpeed += 0.2f;
+                    maxSpeed = Mathf.Clamp(maxSpeed, 1f, 5f);
+                    hitInfo.collider.gameObject.GetComponent<Flock>().flockParameters.speed = maxSpeed;
+                }
             }
             if (Input.GetKeyDown(KeyCode.E))
             {
-                Investigate(hitInfo.collider.gameObject);
+                if (!hitInfo.collider.gameObject.GetComponent<Flock>().isTheif && 
+                    !hitInfo.collider.gameObject.GetComponent<Flock>().hasInteracted)
+                {
+                    Investigate(hitInfo.collider.gameObject);
+                }
             }
             
             if (Input.GetKeyDown(KeyCode.Q))
             {
+                if (ConversationManager.instance.dialogueIsPlaying)
+                {
+                    return;
+                }
                 CatchTheif(hitInfo.collider.gameObject);
             }
         }
@@ -84,9 +109,43 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    private bool canInvestigate = true;
+
+    IEnumerator ResetInvestigate()
+    {
+        canInvestigate = false;
+        yield return new WaitForSeconds(0.2f);
+        canInvestigate = true;
+    }
+
     public void Investigate(GameObject npc)
     {
+        if (!canInvestigate) return;
+
+        if (UI_Hints.count >= 3)
+        {
+            return;
+        }
+
+        if (ConversationManager.instance.dialogueIsPlaying)
+        {
+            return;
+        }
+        Flock npcFlock = npc.GetComponent<Flock>();
+        ConversationManager.instance.EnterDialogueMode(conversations, npcFlock.face, "Inspector Krishna", myPortrait, npcFlock.myName);
+        ConversationManager.instance.OnDialogeExit += AfterConversation;
+        ConversationManager.instance.OnDialogeExit += ()=>
+        {
+            npc.GetComponent<Flock>().ResumeFlock();
+            npc.GetComponent<Flock>().hasInteracted = true;
+        };
+    }
+
+    private void AfterConversation()
+    {
         UI_Hints.instance.RevealHint();
+        StartCoroutine(ResetInvestigate());
+        ConversationManager.instance.OnDialogeExit -= AfterConversation;
     }
 
     public void CatchTheif(GameObject npc)

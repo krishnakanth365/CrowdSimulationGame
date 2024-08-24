@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Rendering;
 
 public class Flock : MonoBehaviour
 {
@@ -10,6 +11,9 @@ public class Flock : MonoBehaviour
     private NavMeshAgent navAgent;
 
     public bool isTheif = false;
+
+    public Sprite face;
+    public string myName;
 
     public GameObject hatObj;
     public GameObject watchObj;
@@ -28,6 +32,8 @@ public class Flock : MonoBehaviour
     private bool isPaused = false;
 
     [SerializeField] Animator myAnimator;
+
+    public bool hasInteracted = false;
 
     void Start()
     {
@@ -140,7 +146,14 @@ public class Flock : MonoBehaviour
             }
 
             // Alignment
-            alignment += neighbor.navAgent.velocity;
+            try
+            {
+                alignment += neighbor.navAgent.velocity;
+            }
+            catch
+            {
+
+            }
 
             // Cohesion
             cohesion += neighbor.transform.position;
@@ -153,7 +166,7 @@ public class Flock : MonoBehaviour
 
             separation *= flockParameters.separationWeight;
             alignment *= flockParameters.alignmentWeight;
-            cohesion *= flockParameters.cohesionWeight * 0.5f; // Reduce cohesion's influence
+            cohesion *= flockParameters.cohesionWeight * 0.5f;
         }
 
         Vector3 flockingDirection = separation + alignment + cohesion;
@@ -199,11 +212,60 @@ public class Flock : MonoBehaviour
         isTheif = true;
     }
 
+    public void PauseFlock()
+    {
+        myAnimator.SetFloat("Speed", 0f);
+        isPaused = true;
+        navAgent.isStopped = true;
+        StartCoroutine(CheckForPlayer());
+    }
+    
+    private void LookAtPlayer()
+    {
+        transform.LookAt(PlayerManager.instance.transform.position);
+        Quaternion rotation = transform.rotation;
+        rotation.x = 0f;
+        rotation.z = 0f;
+        transform.rotation = rotation;
+    }
+
+    IEnumerator CheckForPlayer()
+    {
+        while (true)
+        {
+            if (Vector3.Distance(transform.position, PlayerManager.instance.transform.position) > 2.5f)
+            {
+                ResumeFlock();
+                StopCoroutine(CheckForPlayer());
+                break;
+            }
+            if (!hasInteracted)
+            {
+                LookAtPlayer();
+            }
+            if (hasInteracted)
+            {
+                ResumeFlock();
+                StopCoroutine(CheckForPlayer());
+                break;
+            }
+            yield return null;
+        }
+        yield return null;
+    }
+
+    public void ResumeFlock()
+    {
+        StopCoroutine(CheckForPlayer());
+        navAgent.isStopped = false;
+        isPaused = false;
+        myAnimator.SetFloat("Speed", navAgent.velocity.magnitude);
+    }
+
     public void PauseFlock(float duration)
     {
         StartCoroutine(PauseForSeconds(duration));
     }
-
     private IEnumerator PauseForSeconds(float duration)
     {
         myAnimator.SetFloat("Speed", 0f);

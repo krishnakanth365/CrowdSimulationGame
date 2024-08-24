@@ -103,13 +103,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   flockParameters:
     speed: 0
+    neighborRadius: 3
+    separationDistance: 1.5
+    separationWeight: 1.5
+    alignmentWeight: 1
+    cohesionWeight: 1
+    randomnessFactor: 0.1
   isTheif: 0
+  face: {fileID: 21300000, guid: 92427263c10fc5341b509f6ff4f603b1, type: 3}
+  myName: 'Lauren '
   hatObj: {fileID: 6888861281801321988}
   watchObj: {fileID: 301242716445010714}
   bagObj: {fileID: 6319342145456181599}
   hasBag: 0
   hasWatch: 0
   hasHat: 0
+  updateInterval: 7
+  myAnimator: {fileID: 0}
 --- !u!136 &5815271811811094441
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -476,17 +486,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: ab33154a019c1b44d81b75c975a4b5de,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 0.0322
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ab33154a019c1b44d81b75c975a4b5de,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.0014
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ab33154a019c1b44d81b75c975a4b5de,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 0.0004
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ab33154a019c1b44d81b75c975a4b5de,
         type: 3}
@@ -542,6 +552,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Layer
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ab33154a019c1b44d81b75c975a4b5de,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6147876264314993998, guid: ab33154a019c1b44d81b75c975a4b5de,
         type: 3}
