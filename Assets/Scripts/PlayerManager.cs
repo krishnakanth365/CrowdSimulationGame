@@ -8,6 +8,7 @@ using UnityEngine;
 public class PlayerManager : MonoBehaviour
 {
     [SerializeField] GameObject uiButtons;
+    [SerializeField] GameObject questButtons;
     [SerializeField] LayerMask npcLayer;
 
     [SerializeField] GameObject[] stars;
@@ -26,11 +27,14 @@ public class PlayerManager : MonoBehaviour
 
     public Action OnStrike;
 
+    [SerializeField] Sprite questPortrait;
     [SerializeField] Sprite myPortrait;
     [SerializeField] Sprite[] npcPortraits;
 
-    [SerializeField] string[] conversations;
-    private Flock prevFlock;
+    [SerializeField] string[] conversations; 
+    [SerializeField] string[] questConversations;
+
+    [SerializeField] GameObject questUI;
 
     private void Awake()
     {
@@ -42,6 +46,8 @@ public class PlayerManager : MonoBehaviour
     {
         
     }
+
+    private Flock prevFlock = null;
 
     void Update()
     {
@@ -61,10 +67,17 @@ public class PlayerManager : MonoBehaviour
 
         if (Physics.Raycast(transform.position, Camera.main.transform.forward, out RaycastHit hitInfo, 2f, npcLayer))
         {
-            uiButtons.SetActive(true);
             if (!ConversationManager.instance.dialogueIsPlaying)
             {
-                if (!hitInfo.collider.gameObject.GetComponent<Flock>().isTheif)
+                if (hitInfo.collider.tag == "Quest")
+                {
+                    questButtons.SetActive(true);
+                }
+                else
+                {
+                    uiButtons.SetActive(true);
+                }
+                if (QuestManager.interacted && hitInfo.collider.tag != "Quest")
                 {
                     if (!hitInfo.collider.gameObject.GetComponent<Flock>().isTheif)
                     {
@@ -75,18 +88,33 @@ public class PlayerManager : MonoBehaviour
                         prevFlock = hitInfo.collider.gameObject.GetComponent<Flock>();
                         prevFlock.PauseFlock();
                     }
-                }
-                else
-                {
-                    hitInfo.collider.gameObject.GetComponent<Flock>().PauseFlock(1f);
-                    float maxSpeed = hitInfo.collider.gameObject.GetComponent<Flock>().flockParameters.speed;
-                    maxSpeed += 0.2f;
-                    maxSpeed = Mathf.Clamp(maxSpeed, 1f, 5f);
-                    hitInfo.collider.gameObject.GetComponent<Flock>().flockParameters.speed = maxSpeed;
+                    else
+                    {
+                        hitInfo.collider.gameObject.GetComponent<Flock>().PauseFlock(1f);
+                        float maxSpeed = hitInfo.collider.gameObject.GetComponent<Flock>().flockParameters.speed;
+                        maxSpeed += 0.2f;
+                        maxSpeed = Mathf.Clamp(maxSpeed, 1f, 5f);
+                        hitInfo.collider.gameObject.GetComponent<Flock>().flockParameters.speed = maxSpeed;
+                    }
                 }
             }
             if (Input.GetKeyDown(KeyCode.E))
             {
+                if (hitInfo.collider.tag == "Quest" && !QuestManager.interacted)
+                {
+                    ConversationManager.instance.EnterDialogueMode(questConversations, questPortrait, "Inspector Krishna", myPortrait, "Sr.Police Officer");
+                    //ConversationManager.instance.OnDialogeExit += AfterConversation;
+                    ConversationManager.instance.OnDialogeExit += () =>
+                    {
+                        QuestManager.interacted = true;
+                        questUI.SetActive(false);
+                    };
+                    return;
+                }
+                if (!QuestManager.interacted || hitInfo.collider.tag == "Quest")
+                {
+                    return;
+                }
                 if (!hitInfo.collider.gameObject.GetComponent<Flock>().isTheif && 
                     !hitInfo.collider.gameObject.GetComponent<Flock>().hasInteracted)
                 {
@@ -96,6 +124,10 @@ public class PlayerManager : MonoBehaviour
             
             if (Input.GetKeyDown(KeyCode.Q))
             {
+                if (!QuestManager.interacted)
+                {
+                    return;
+                }
                 if (ConversationManager.instance.dialogueIsPlaying)
                 {
                     return;
@@ -106,6 +138,7 @@ public class PlayerManager : MonoBehaviour
         else
         {
             uiButtons.SetActive(false);
+            questButtons.SetActive(false);
         }
     }
 
@@ -142,6 +175,13 @@ public class PlayerManager : MonoBehaviour
     }
 
     private void AfterConversation()
+    {
+        UI_Hints.instance.RevealHint();
+        StartCoroutine(ResetInvestigate());
+        ConversationManager.instance.OnDialogeExit -= AfterConversation;
+    }
+    
+    private void QuestAfterConversation()
     {
         UI_Hints.instance.RevealHint();
         StartCoroutine(ResetInvestigate());

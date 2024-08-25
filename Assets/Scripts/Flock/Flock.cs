@@ -154,7 +154,6 @@ public class Flock : MonoBehaviour
             {
 
             }
-
             // Cohesion
             cohesion += neighbor.transform.position;
         }
@@ -233,7 +232,7 @@ public class Flock : MonoBehaviour
     {
         while (true)
         {
-            if (Vector3.Distance(transform.position, PlayerManager.instance.transform.position) > 2.5f)
+            if (Vector3.Distance(transform.position, PlayerManager.instance.transform.position) > 5)
             {
                 ResumeFlock();
                 StopCoroutine(CheckForPlayer());
